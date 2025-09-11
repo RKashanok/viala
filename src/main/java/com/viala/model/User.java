@@ -10,7 +10,9 @@ import lombok.Data;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email")
+})
 @Data
 public class User {
 
@@ -19,7 +21,14 @@ public class User {
     private Long id;
 
     @NotBlank
-    private String fullName;
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -30,9 +39,9 @@ public class User {
     @Max(120)
     private Integer age;
 
-    @ElementCollection
-    private List<String> allergies;
-    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAllergy> allergies;
+
     @NotBlank
     private String password;
 }

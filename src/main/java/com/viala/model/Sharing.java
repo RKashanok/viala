@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "sharing")
+@Table(name = "sharing", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"medication_list_id", "shared_with_id"})
+})
 @Data
 public class Sharing {
 

@@ -1,14 +1,16 @@
 package com.viala.controller;
 
 import com.viala.controller.dto.ApiResponse;
-import com.viala.model.Medication;
+import com.viala.model.MedicationDetail;
 import com.viala.model.MedicationList;
+import com.viala.model.User;
+import com.viala.repository.UserRepository;
+import com.viala.service.MedicationDetailService;
 import com.viala.service.MedicationListService;
-import com.viala.service.MedicationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,16 +20,21 @@ import java.util.List;
 public class MedicationListController {
 
     private final MedicationListService medicationListService;
-    private final MedicationService medicationService;
+    private final MedicationDetailService medicationDetailService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public MedicationListController(MedicationListService medicationListService, MedicationService medicationService) {
+    public MedicationListController(MedicationListService medicationListService, MedicationDetailService medicationDetailService, UserRepository userRepository) {
         this.medicationListService = medicationListService;
-        this.medicationService = medicationService;
+        this.medicationDetailService = medicationDetailService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<MedicationList>> createMedicationList(@Valid @RequestBody MedicationList medicationList) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(username).orElse(null);
+        medicationList.setUser(user);
         MedicationList newList = medicationListService.saveMedicationList(medicationList);
         return ResponseEntity.ok(new ApiResponse<>(true, newList, null));
     }
@@ -45,14 +52,14 @@ public class MedicationListController {
     }
 
     @PostMapping("/{listId}/medications")
-    public ResponseEntity<ApiResponse<Medication>> addMedicationToList(@PathVariable Long listId, @Valid @RequestBody Medication medication) {
-        Medication newMedication = medicationListService.addMedicationToList(listId, medication);
-        return ResponseEntity.ok(new ApiResponse<>(true, newMedication, null));
+    public ResponseEntity<ApiResponse<MedicationDetail>> addMedicationToList(@PathVariable Long listId, @Valid @RequestBody MedicationDetail medicationDetail) {
+        MedicationDetail newMedicationDetail = medicationDetailService.saveMedicationDetail(medicationDetail);
+        return ResponseEntity.ok(new ApiResponse<>(true, newMedicationDetail, null));
     }
 
     @GetMapping("/{listId}/medications")
-    public ResponseEntity<ApiResponse<List<Medication>>> getMedicationsFromList(@PathVariable Long listId) {
-        List<Medication> medications = medicationListService.getMedicationsFromList(listId);
-        return ResponseEntity.ok(new ApiResponse<>(true, medications, null));
+    public ResponseEntity<ApiResponse<List<MedicationDetail>>> getMedicationsFromList(@PathVariable Long listId) {
+        List<MedicationDetail> medicationDetails = medicationDetailService.getMedicationDetailsFromList(listId);
+        return ResponseEntity.ok(new ApiResponse<>(true, medicationDetails, null));
     }
 }

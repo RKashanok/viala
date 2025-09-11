@@ -1,10 +1,9 @@
 package com.viala.service;
 
-import com.viala.model.Medication;
 import com.viala.model.MedicationList;
 import com.viala.repository.MedicationListRepository;
-import com.viala.repository.MedicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,15 +12,14 @@ import java.util.List;
 public class MedicationListService {
 
     private final MedicationListRepository medicationListRepository;
-    private final MedicationRepository medicationRepository;
 
     @Autowired
-    public MedicationListService(MedicationListRepository medicationListRepository, MedicationRepository medicationRepository) {
+    public MedicationListService(MedicationListRepository medicationListRepository) {
         this.medicationListRepository = medicationListRepository;
-        this.medicationRepository = medicationRepository;
     }
 
     public MedicationList saveMedicationList(MedicationList medicationList) {
+        SecurityContextHolder.getContext().getAuthentication().getCredentials();
         return medicationListRepository.save(medicationList);
     }
 
@@ -32,18 +30,5 @@ public class MedicationListService {
 
     public void deleteMedicationList(Long id) {
         medicationListRepository.deleteById(id);
-    }
-
-    public Medication addMedicationToList(Long listId, Medication medication) {
-        MedicationList medicationList = medicationListRepository.findById(listId).orElse(null);
-        if (medicationList != null) {
-            medication.setList(medicationList);
-            return medicationRepository.save(medication);
-        }
-        return null;
-    }
-
-    public List<Medication> getMedicationsFromList(Long listId) {
-        return medicationRepository.findByListId(listId);
     }
 }

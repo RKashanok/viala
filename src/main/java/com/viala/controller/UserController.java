@@ -1,6 +1,7 @@
 package com.viala.controller;
 
 import com.viala.controller.dto.ApiResponse;
+import com.viala.controller.dto.RegisterResponse;
 import com.viala.controller.dto.SharingRequest;
 import com.viala.model.MedicationList;
 import com.viala.model.Sharing;
@@ -36,17 +37,17 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody User user) {
+    public ResponseEntity<ApiResponse<RegisterResponse>> registerUser(@Valid @RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(new ApiResponse<>(true, savedUser, null));
+        return ResponseEntity.ok(new ApiResponse<>(true, new RegisterResponse(savedUser.getId()), null));
     }
 
     @PostMapping("/share")
     public ResponseEntity<ApiResponse<Sharing>> shareMedicationList(@RequestBody SharingRequest sharingRequest) {
         String ownerUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        User owner = userRepository.findByFullName(ownerUsername).orElse(null);
-        User sharedWith = userRepository.findByFullName(sharingRequest.getEmail()).orElse(null);
+        User owner = userRepository.findByEmail(ownerUsername).orElse(null);
+        User sharedWith = userRepository.findByEmail(sharingRequest.getEmail()).orElse(null);
         MedicationList medicationList = medicationListRepository.findById(sharingRequest.getMedicationListId()).orElse(null);
 
         if (owner != null && sharedWith != null && medicationList != null) {
