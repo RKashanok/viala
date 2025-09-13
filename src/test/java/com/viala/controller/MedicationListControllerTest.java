@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -19,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 class MedicationListControllerTest {
@@ -41,7 +43,7 @@ class MedicationListControllerTest {
     @BeforeEach
     void setUp() {
         User user = new User();
-        user.setFullName("testuser");
+        user.setEmail("testuser@test.com");
         user.setPassword("password");
         user.setAge(30);
         user.setGender(com.viala.model.Gender.MALE);
@@ -49,7 +51,7 @@ class MedicationListControllerTest {
         restTemplate.postForEntity("/api/users/register", user, ApiResponse.class);
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("testuser");
+        loginRequest.setUsername("testuser@test.com");
         loginRequest.setPassword("password");
 
         ResponseEntity<JwtAuthenticationResponse> response = restTemplate.postForEntity("/api/auth/login", loginRequest, JwtAuthenticationResponse.class);
