@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="1" author="kashenok.r">
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="gender" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="kashenok.r">
+        <createTable tableName="medication_lists">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_medication_lists_users"
+                             references="users(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="kashenok.r">
+        <createTable tableName="medications">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="kashenok.r">
+        <createTable tableName="medication_details">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_medication_details_users"
+                             references="users(id)"/>
+            </column>
+            <column name="medication_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_medication_details_medications"
+                             references="medications(id)"/>
+            </column>
+            <column name="quantity" type="decimal(19,2)">
+            </column>
+            <column name="expiration_date" type="date">
+            </column>
+            <column name="medication_list_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_medication_details_medication_lists"
+                             references="medication_lists(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="kashenok.r">
+        <createTable tableName="sharing">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="medication_list_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_sharing_medication_lists"
+                             references="medication_lists(id)"/>
+            </column>
+            <column name="shared_with_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_sharing_users"
+                             references="users(id)"/>
+            </column>
+            <column name="permission" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="7" author="kashenok.r">
+        <createTable tableName="user_allergies">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_user_allergies_users"
+                             references="users(id)"/>
+            </column>
+            <column name="allergies" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="8" author="kashenok.r">
+        <addUniqueConstraint tableName="medications" columnNames="name,unit"
+                             constraintName="uc_medications_name_unit"/>
+    </changeSet>
+
+    <changeSet id="9" author="kashenok.r">
+        <addUniqueConstraint tableName="medication_lists" columnNames="user_id,name"
+                             constraintName="uc_medication_lists_user_name"/>
+    </changeSet>
+
+    <changeSet id="10" author="kashenok.r">
+        <addUniqueConstraint tableName="sharing" columnNames="medication_list_id,shared_with_id"
+                             constraintName="uc_sharing_list_user"/>
+    </changeSet>
+
+    <changeSet id="11" author="kashenok.r">
+        <createIndex tableName="medication_lists" indexName="idx_medication_lists_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="medication_details" indexName="idx_medication_details_list_id">
+            <column name="medication_list_id"/>
+        </createIndex>
+        <createIndex tableName="medication_details" indexName="idx_medication_details_medication_id">
+            <column name="medication_id"/>
+        </createIndex>
+        <createIndex tableName="medication_details" indexName="idx_medication_details_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="sharing" indexName="idx_sharing_list_id">
+            <column name="medication_list_id"/>
+        </createIndex>
+        <createIndex tableName="sharing" indexName="idx_sharing_shared_with_id">
+            <column name="shared_with_id"/>
+        </createIndex>
+        <createIndex tableName="user_allergies" indexName="idx_user_allergies_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
